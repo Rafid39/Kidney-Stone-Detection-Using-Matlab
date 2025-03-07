@@ -42,7 +42,7 @@ Detecting kidney stones in medical images is essential for early diagnosis and t
 2. Open MATLAB and navigate to the project directory.
 3. Run the script:
    ```matlab
-   kidney_stone_detection.m
+   Final_Code.m
    ```
 4. Select a medical image when prompted.
 5. Manually select the Region of Interest (ROI).
