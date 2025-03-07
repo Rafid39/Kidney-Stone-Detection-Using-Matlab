@@ -48,73 +48,6 @@ Detecting kidney stones in medical images is essential for early diagnosis and t
 5. Manually select the Region of Interest (ROI).
 6. View processed images and detection results.
 
-## Code Implementation
-The MATLAB script follows these key steps:
-```matlab
-clc;
-clear;
-close all;
-warning off;
-
-% Load Image
-[file, path] = uigetfile({'*.jpg;*.png;*.bmp'}, 'Select an Image File');
-if isequal(file, 0)
-    disp('No file selected.');
-    return;
-end
-imagePath = fullfile(path, file);
-rawImage = imread(imagePath);
-figure; imshow(rawImage), title('Original Image');
-
-% Convert to Grayscale
-grayImg = rgb2gray(rawImage);
-figure; imshow(grayImg), title('Grayscale Image');
-
-% Binarization
-binaryImg = imbinarize(grayImg, 20 / 255);
-figure; imshow(binaryImg), title('Binarized Image');
-
-% Fill Holes and Remove Small Objects
-filledImg = imfill(binaryImg, 'holes');
-cleanImg = bwareaopen(filledImg, 1000);
-
-% Extract ROI
-roiImage = uint8(double(rawImage) .* repmat(cleanImg, [1, 1, 3]));
-figure; imshow(roiImage), title('Region of Interest (ROI)');
-
-% Contrast Enhancement
-adjImage = imadjust(roiImage, [0.3 0.7], []) + 50;
-grayAdjImg = rgb2gray(adjImage);
-filteredImg = medfilt2(grayAdjImg, [5 5]) > 250;
-
-% Morphological Filtering
-se = strel('disk', 5);
-cleanedImg = imerode(filteredImg, se);
-finalProcessed = imdilate(cleanedImg, se);
-figure; imshow(finalProcessed), title('Cleaned and Processed Image');
-
-% Detect Potential Stones
-labeledRegions = bwlabel(finalProcessed);
-objectStats = regionprops(labeledRegions, 'Area', 'Centroid', 'BoundingBox');
-markedCircles = [];
-
-for i = 1:length(objectStats)
-    if objectStats(i).Area > 100 && objectStats(i).Area < 5000
-        centroid = objectStats(i).Centroid;
-        bbox = objectStats(i).BoundingBox;
-        radius = bbox(3) / 1.8;
-        markedCircles = [markedCircles; centroid, radius];
-    end
-end
-
-% Display Detection Result
-figure; imshow(rawImage); hold on;
-for i = 1:size(markedCircles, 1)
-    viscircles(markedCircles(i, 1:2), markedCircles(i, 3), 'EdgeColor', 'g', 'LineWidth', 2);
-end
-hold off; title('Detected Stones');
-```
-
 ## Result Analysis
 The system successfully processed medical images and detected kidney stones in most cases. However, detection accuracy depends on:
 - **Noise and image quality**: High noise levels can affect detection.
@@ -145,6 +78,3 @@ The system successfully processed medical images and detected kidney stones in m
 ## License
 This project is licensed under the MIT License.
 
----
-
-This README provides a complete overview of your project, covering methodology, installation, usage, and team contributions. Let me know if you need any modifications!
